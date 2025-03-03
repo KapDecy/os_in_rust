@@ -22,7 +22,7 @@ pub extern "C" fn _start() -> ! {
 
 fn main() {
     println!("hello world");
-    booblick::booblick();
+    booblick::booblick_fast();
     // for i in 1..500 {
     //     println!("aboba {}", i);
     //     for _ in 0..10000000 {
