@@ -24,7 +24,7 @@ pub enum Color {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(transparent)]
-struct ColorCode(u8);
+pub struct ColorCode(pub u8);
 
 impl ColorCode {
     fn new(foreground: Color, background: Color) -> ColorCode {
@@ -34,9 +34,9 @@ impl ColorCode {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(C)]
-struct ScreenChar {
-    ascii_character: u8,
-    color_code: ColorCode,
+pub struct ScreenChar {
+    pub ascii_character: u8,
+    pub color_code: ColorCode,
 }
 
 const BUFFER_HEIGHT: usize = 25;
@@ -46,14 +46,14 @@ use spin::Mutex;
 use volatile::Volatile;
 
 // #[repr(transparent)]
-struct Buffer {
-    chars: [[Volatile<ScreenChar>; BUFFER_WIDTH]; BUFFER_HEIGHT],
+pub struct Buffer {
+    pub chars: [[Volatile<ScreenChar>; BUFFER_WIDTH]; BUFFER_HEIGHT],
 }
 
 pub struct Writer {
-    column_position: usize,
-    color_code: ColorCode,
-    buffer: *mut Buffer,
+    pub column_position: usize,
+    pub color_code: ColorCode,
+    pub buffer: *mut Buffer,
 }
 
 impl Writer {
@@ -142,5 +142,9 @@ macro_rules! println {
 #[doc(hidden)]
 pub fn _print(args: fmt::Arguments) {
     use core::fmt::Write;
-    unsafe { &mut VGA_WRITER }.lock().write_fmt(args).unwrap();
+    use x86_64::instructions::interrupts;
+
+    interrupts::without_interrupts(|| {
+        unsafe { &mut VGA_WRITER }.lock().write_fmt(args).unwrap();
+    });
 }
